@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'grades',
     'schedules',
     'users',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
