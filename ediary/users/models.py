@@ -1,89 +1,75 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin, Group, Permission
 from django.db import models
-from django.contrib.auth.hashers import make_password, check_password
+from django.db import IntegrityError
 
-from django.db import models
 
-# 1. Преподаватель
-class Prepod(models.Model):
-    first_name = models.CharField(max_length=40)
-    middle_name = models.CharField(max_length=40)
-    last_name = models.CharField(max_length=40, blank=True, null=True)
-    date_birthday = models.DateField()
+class UserManager(BaseUserManager):    
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self.create_user(email, password, **extra_fields)
+    
+
+
+class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
-    phone_number = models.CharField(max_length=15, unique=True)
-    date_input = models.DateField(auto_now_add=True)
-    date_output = models.DateField(null=True, blank=True)
-    pswd = models.CharField(max_length=100)
-    
-    def set_password(self, raw_password):
-        self.pswd = make_password(raw_password)
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-    def check_password(self, raw_password):
-        return check_password(raw_password, self.pswd)
-    
+    groups = models.ManyToManyField(Group, related_name='custom_user_set', blank=True)
+    user_permissions = models.ManyToManyField(Permission, related_name='custom_user_set', blank=True)
+
+    objects = UserManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
     def __str__(self):
-        return f'{self.first_name} {self.last_name}'
+        return self.email
 
-# 2. Предметник
+
+# 1. Предметник
 class DisciplinePrepod(models.Model):
-    prepod = models.ForeignKey(Prepod, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  # заменили на User
     actions = models.TextField(null=True, blank=True)
 
 
-
-# 3. Куратор
+# 2. Куратор
 class TutorPrepod(models.Model):
-    prepod = models.ForeignKey(Prepod, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  # заменили на User
     actions = models.TextField(null=True, blank=True)
 
 
-# 4. Родитель
+# 3. Родитель
 class Guardian(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
     first_name = models.CharField(max_length=40)
     middle_name = models.CharField(max_length=40)
     last_name = models.CharField(max_length=40, blank=True, null=True)
-    email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=15, unique=True)
-    pswd = models.CharField(max_length=100)
-    date_input = models.DateField(auto_now_add=True, null=True)  # Заполняется автоматически при создании
-    date_output = models.DateField(blank=True, null=True)  # Может быть пустым
-
+    date_input = models.DateField(auto_now_add=True, null=True)
+    date_output = models.DateField(blank=True, null=True)
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
 
-    def set_password(self, raw_password):
-        self.pswd = make_password(raw_password)
 
-    def check_password(self, raw_password):
-        return check_password(raw_password, self.pswd)
-
-# 5. Студент
+# 4. Студент
 class Student(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
     first_name = models.CharField(max_length=40)
     middle_name = models.CharField(max_length=40)
     last_name = models.CharField(max_length=40, blank=True, null=True)
     date_birthday = models.DateField()
-    email = models.EmailField(unique=True)
-    phone_number = models.CharField(max_length=15, unique=True)
     is_learning = models.BooleanField(default=True)
     is_headman = models.BooleanField(default=False)
     guardian = models.ForeignKey('users.Guardian', on_delete=models.SET_NULL, null=True, blank=True)
     group = models.ForeignKey('schedules.Group', on_delete=models.CASCADE)
-    password = models.CharField(max_length=128, null=True, blank=True)
     date_input = models.DateField(null=True, blank=True)
     date_output = models.DateField(null=True, blank=True)
 
-    # Прямое указание на связь с SubGroup
     sub_groups = models.ManyToManyField('schedules.SubGroup', related_name='students')
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
-
-    def set_password(self, raw_password):
-        self.password = make_password(raw_password)
-        self.save()
-
-    def check_password(self, raw_password):
-        return check_password(raw_password, self.password)

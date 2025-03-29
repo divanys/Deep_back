@@ -5,7 +5,7 @@ class Group(models.Model):
     name = models.CharField(max_length=10, unique=True)
     specialization = models.CharField(max_length=40)
     journal = models.ForeignKey('grades.Journal', on_delete=models.CASCADE, null=True, blank=True)
-    tutor_prepod = models.ForeignKey('users.Prepod', on_delete=models.SET_NULL, null=True, blank=True)  
+    tutor_prepod = models.ForeignKey('users.TutorPrepod', on_delete=models.SET_NULL, null=True, blank=True)  
 
     def __str__(self):
         return self.name
