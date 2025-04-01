@@ -65,7 +65,7 @@ class Student(models.Model):
     is_learning = models.BooleanField(default=True)
     is_headman = models.BooleanField(default=False)
     guardian = models.ForeignKey('users.Guardian', on_delete=models.SET_NULL, null=True, blank=True)
-    group = models.ForeignKey('schedules.Group', on_delete=models.CASCADE)
+    group = models.ForeignKey('schedules.Group', on_delete=models.CASCADE, null=True, blank=True)
     date_input = models.DateField(null=True, blank=True)
     date_output = models.DateField(null=True, blank=True)
 

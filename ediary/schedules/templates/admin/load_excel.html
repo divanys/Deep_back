@@ -1,0 +1,30 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% block title %}Загрузка данных из Excel{% endblock %}
+{% block content %}
+    <h1>Загрузка данных из Excel</h1>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="excel_file">Выберите файл Excel:</label>
+        <input type="file" name="excel_file" accept=".xls,.xlsx" required><br><br>
+        <button type="submit">Загрузить</button>
+    </form>
+{% endblock %}
+
+<!-- <!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Загрузка данных из Excel</title>
+</head>
+<body>
+    <h1>Загрузка данных из Excel</h1>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="excel_file">Выберите файл Excel:</label>
+        <input type="file" name="excel_file" accept=".xls,.xlsx" required><br><br>
+        <button type="submit">Загрузить</button>
+    </form>
+</body>
+</html> -->

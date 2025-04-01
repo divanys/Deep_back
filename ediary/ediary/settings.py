@@ -1,3 +1,6 @@
+#  python manage.py show_urls   
+
+
 """
 Django settings for ediary project.
 
@@ -41,7 +44,8 @@ INSTALLED_APPS = [
     'grades',
     'schedules',
     'users',
-    'rest_framework'
+    'rest_framework',
+    'django_extensions'
 ]
 
 
