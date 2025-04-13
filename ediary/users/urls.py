@@ -10,6 +10,5 @@ urlpatterns = [
     # path('prep_discipline/', views.prep_discipline, name='prep_discipline'),
     # path('student/', views.student, name='student'),
     # path('parent/', views.parent, name='parent'),
-    # path('admin/', views.admin, name='admin'),
     path('students/student_list/', views.student_list, name='student_list'),
 ]

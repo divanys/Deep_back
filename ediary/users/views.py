@@ -27,9 +27,9 @@ def auth(request):
                 login(request, user)
 
                 # Определяем роль пользователя
-                if hasattr(user.disciplineprepod, 'disciplineprepod'):
+                if hasattr(user.disciplineprepod_set, 'disciplineprepod'):
                     role = 'discipline_prepod'
-                if hasattr(user.tutorprepod, 'tutorprepod'):
+                elif hasattr(user.tutorprepod_set, 'tutorprepod'):
                     role = 'tutor_prepod'
                 elif hasattr(user, 'student'):
                     role = 'student'
