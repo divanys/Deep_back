@@ -1,0 +1,15 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block object-tools %}
+  {{ block.super }}
+  <li>
+    <a href="{{ import_xlsx_url }}" class="button">📥 Импорт из Excel</a>
+  </li>
+  <li>
+    <a href="{{ parse_docx_url }}" class="button">📄 Импорт из DOCX</a>
+  </li>
+  <li>
+    <a href="{{ download_xlsx_url }}" class="button">⬇️ Скачать логины/пароли</a>
+  </li>
+{% endblock %}

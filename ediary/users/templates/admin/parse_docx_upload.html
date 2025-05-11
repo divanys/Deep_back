@@ -1,0 +1,8 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>Импорт студентов из DOCX</h1>
+<form method="post" enctype="multipart/form-data">{% csrf_token %}
+  <input type="file" name="docx_file" accept=".docx" required>
+  <button type="submit" class="default">Загрузить и преобразовать</button>
+</form>
+{% endblock %}

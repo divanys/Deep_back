@@ -1,0 +1,11 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h2>Загрузка студентов из XLSX</h2>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="xlsx_file" required>
+    <button type="submit">Импорт</button>
+</form>
+<br>
+<a href="{% url 'admin:users_student_changelist' %}">Назад</a>
+{% endblock %}

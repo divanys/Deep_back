@@ -1,3 +1,6 @@
+#  python manage.py show_urls   
+
+
 """
 Django settings for ediary project.
 
@@ -26,7 +29,7 @@ SECRET_KEY = 'django-insecure-jc^-1a391$*w!a)%pirr4dgpyu2p$oecr$kpefm+-=z%)&9h*u
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.1.11']  # Например: '192.168.1.100'
 
 
 # Application definition
@@ -34,6 +37,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
+    'rest_framework.authtoken',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -41,10 +45,17 @@ INSTALLED_APPS = [
     'grades',
     'schedules',
     'users',
+    'rest_framework',
+    'django_extensions',
+    'corsheaders',
 ]
+
+
+AUTH_USER_MODEL = 'users.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -88,6 +99,25 @@ DATABASES = {
     }
 }
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # Адрес вашего React-приложения
+    "http://192.168.1.11:5173",  # Добавьте IP для фронтенда
+    "http://192.168.1.11:8000",  # Для прямого доступа к API
+]
+CORS_ALLOW_METHODS = [
+    'GET',
+    'POST',
+    'OPTIONS',  # Важно для предварительных запросов
+]
+
+CORS_ALLOW_HEADERS = [
+    'content-type',
+    'authorization',
+]
+AUTHENTICATION_BACKENDS = [
+    'users.authentication.EmailBackend',  # кастомный бэкенд
+    'django.contrib.auth.backends.ModelBackend',
+]
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

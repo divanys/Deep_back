@@ -1,0 +1,11 @@
+{% extends "admin/change_list.html" %}
+{% block content %}
+  <div class="module">
+    <h2>Импорт и экспорт кураторов</h2>
+    <div class="actions">
+      <a href="{% url 'admin:import_curators_xlsx' %}" class="button">Импортировать кураторов из .xlsx</a>
+      <a href="{% url 'admin:download_curators_xlsx' %}" class="button">Скачать кураторов в .xlsx</a>
+    </div>
+  </div>
+  {{ block.super }}
+{% endblock %}
