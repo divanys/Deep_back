@@ -29,7 +29,7 @@ def auth(request):
             password = data.get('password')
 
             if not email or not password:
-                return JsonResponse({'error': 'Email and password required'}, status=400)
+                return JsonResponse({'error': 'Login and password required'}, status=400)
 
             user = authenticate(request, email=email, password=password)
             
@@ -48,10 +48,10 @@ def auth(request):
                 elif user.is_superuser:
                     role = 'admin'
                 
-                print(f"User {user.email} auth check:")
-                print(f"Student: {hasattr(user, 'student')}")
-                print(f"TutorPrepod: {hasattr(user, 'tutorprepod')}")
-                print(f"DisciplinePrepod: {hasattr(user, 'disciplineprepod')}")
+                # print(f"User {user.email} auth check:")
+                # print(f"Student: {hasattr(user, 'student')}")
+                # print(f"TutorPrepod: {hasattr(user, 'tutorprepod')}")
+                # print(f"DisciplinePrepod: {hasattr(user, 'disciplineprepod')}")
                
                 return JsonResponse({
                     'token': token.key,

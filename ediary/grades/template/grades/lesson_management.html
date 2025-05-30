@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Управление занятием</h2>
+    <form method="post">
+        {% csrf_token %}
+        
+        <h3>Информация о занятии</h3>
+        {{ lesson_form.as_p }}
+        
+        <h3>Оценки и посещаемость</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Студент</th>
+                    <th>Посещаемость</th>
+                    <th>Оценка</th>
+                    <th>Зачёт</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for form in formset %}
+                <tr>
+                    <td>{{ form.instance.student.get_full_name }}</td>
+                    <td>{{ form.attendance }}</td>
+                    <td>{{ form.mark }}</td>
+                    <td>{{ form.offset_mark }}</td>
+                    {{ form.id }}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+    </form>
+</div>
+{% endblock %}

@@ -76,19 +76,6 @@ class TutorPrepod(models.Model):
     # Дополнительные связи при необходимости
     # group = models.ForeignKey(StudentGroup, on_delete=models.SET_NULL, null=True)
 
-# 3. Родитель
-class Guardian(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
-    first_name = models.CharField(max_length=40)
-    middle_name = models.CharField(max_length=40)
-    last_name = models.CharField(max_length=40, blank=True, null=True)
-    phone_number = models.CharField(max_length=15, unique=True)
-    date_input = models.DateField(auto_now_add=True, null=True)
-    date_output = models.DateField(blank=True, null=True)
-
-    def __str__(self):
-        return f'{self.first_name} {self.last_name}'
-
 
 # 4. Студент
 class Student(models.Model):
@@ -99,7 +86,6 @@ class Student(models.Model):
     date_birthday = models.DateField()
     is_learning = models.BooleanField(default=True)
     is_headman = models.BooleanField(default=False)
-    guardian = models.ForeignKey('users.Guardian', on_delete=models.SET_NULL, null=True, blank=True)
     group = models.ForeignKey('schedules.Group', on_delete=models.CASCADE, null=True, blank=True)
     date_input = models.DateField(null=True, blank=True)
     date_output = models.DateField(null=True, blank=True)

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Guardian, Student, DisciplinePrepod, TutorPrepod
+from .models import User, Student, DisciplinePrepod, TutorPrepod
 import pandas as pd
 import random
 import string
@@ -9,11 +9,11 @@ from django.urls import path, reverse
 from django.template.response import TemplateResponse
 from django.http import HttpResponse
 from django.utils.translation import gettext_lazy as _
-from .models import User, Guardian, Student, DisciplinePrepod, TutorPrepod
 from django.contrib.auth.hashers import make_password
 import os
 import datetime
-
+from django.db import IntegrityError
+import secrets
 
 from .utils import parse_docx_to_student_xlsx  
 
@@ -29,26 +29,32 @@ class GuardianAdmin(admin.ModelAdmin):
 
 EXPORT_FILENAME = "generated_students.xlsx"
 
-# Функции генерации логина и пароля
-def generate_login():
-    unique_id = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
-    return f"student_{unique_id}"
+# Улучшенные функции генерации
+def generate_unique_login(prefix="student"):
+    max_attempts = 5
+    for _ in range(max_attempts):
+        unique_id = secrets.token_urlsafe(6)[:8]
+        login = f"{prefix}_{unique_id}"
+        if not User.objects.filter(email=login).exists():
+            return login
+    raise ValueError(f"Не удалось создать уникальный логин для префикса {prefix} после {max_attempts} попыток")
 
 def generate_password():
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+    return secrets.token_urlsafe(12)[:16]
 
-# Функция создания пользователя в БД с хэшированным паролем
-def create_user(student):
-    password = student["password"]
+# Функция создания пользователя с обработкой уникальности
+def create_user_with_unique_login(prefix):
+    login = generate_unique_login(prefix)
+    password = generate_password()
     user = User.objects.create(
-        email=student["username"],
+        email=login,
         is_superuser=False,
         is_active=True,
         is_staff=False,
     )
-    user.set_password(password)  # Хэшируем пароль перед сохранением
+    user.set_password(password)
     user.save()
-    return user
+    return user, password
 
 # Функция создания студента в БД
 def create_student(student, user):
@@ -72,7 +78,8 @@ class StudentAdmin(admin.ModelAdmin):
     list_filter = ('is_learning',)
     change_list_template = "admin/student_changelist.html"
 
-    def get_urls(self):
+# используется для добавления кастомных URL-адресов 
+    def get_urls(self): 
         urls = super().get_urls()
         custom_urls = [
             path('import-xlsx/', self.import_xlsx, name='import_xlsx'),
@@ -104,11 +111,11 @@ class StudentAdmin(admin.ModelAdmin):
                     is_headman_str = row.get("is_headman", "").strip().upper()
                     is_headman = is_headman_str in ["ИСТИНА", "TRUE", "1"]
 
-
+                    user, password = create_user_with_unique_login("student")
 
                     student_data = {
-                        "username": generate_login(),
-                        "password": generate_password(),
+                        "username": user.email,
+                        "password": password,
                         "first_name": row["first_name"],
                         "middle_name": row.get("middle_name", ""),
                         "last_name": row["last_name"],
@@ -120,7 +127,6 @@ class StudentAdmin(admin.ModelAdmin):
                         "date_output": None
                     }
 
-                    user = create_user(student_data)
                     create_student(student_data, user)
                     students.append(student_data)
 
@@ -149,15 +155,14 @@ class StudentAdmin(admin.ModelAdmin):
     def parse_docx_view(self, request):
         if request.method == "POST" and request.FILES.get("docx_file"):
             docx_file = request.FILES["docx_file"]
-            output_filename = EXPORT_FILENAME  # или можно сделать уникальным
+            output_filename = EXPORT_FILENAME
             parse_docx_to_student_xlsx(docx_file, output_filename)
             messages.success(request, f"Файл преобразован в Excel: {EXPORT_FILENAME}")
             return redirect("..")
 
         return TemplateResponse(request, "admin/parse_docx_upload.html")
 
-
-# Класс импорта куратороы через админку
+# Класс импорта кураторов через админку
 class TutorPrepodAdmin(admin.ModelAdmin):
     list_display = ('first_name', 'last_name', 'phone_number', 'date_input')
     search_fields = ('first_name', 'last_name', 'middle_name')
@@ -188,24 +193,11 @@ class TutorPrepodAdmin(admin.ModelAdmin):
 
             for _, row in df.iterrows():
                 try:
-                    # Генерация учетных данных
-                    login = generate_login().replace("student", "curator")
-                    password = generate_password()
+                    user, password = create_user_with_unique_login("curator")
                     
-                    # Парсинг дат
                     date_input = pd.to_datetime(row.get("date_input", datetime.date.today())).strftime("%Y-%m-%d")
                     date_output = pd.to_datetime(row["date_output"]).strftime("%Y-%m-%d") if row.get("date_output") else None
 
-                    # Создание пользователя
-                    user = User.objects.create(
-                        email=login,
-                        is_active=True,
-                        is_staff=False,
-                    )
-                    user.set_password(password)
-                    user.save()
-
-                    # Создание записи куратора
                     curator = TutorPrepod.objects.create(
                         user=user,
                         first_name=row["first_name"],
@@ -214,7 +206,7 @@ class TutorPrepodAdmin(admin.ModelAdmin):
                     )
 
                     created.append({
-                        "username": login,
+                        "username": user.email,
                         "password": password,
                         "first_name": curator.first_name,
                         "last_name": curator.last_name,
@@ -250,7 +242,7 @@ class TutorPrepodAdmin(admin.ModelAdmin):
         messages.error(request, "Файл для скачивания не найден")
         return redirect("..")
 
-# Класс импорта предметника через админку
+# Класс импорта преподавателей через админку
 class DisciplinePrepodAdmin(admin.ModelAdmin):
     list_display = ('first_name', 'last_name', 'phone_number', 'date_input')
     search_fields = ('first_name', 'last_name', 'middle_name')
@@ -281,24 +273,11 @@ class DisciplinePrepodAdmin(admin.ModelAdmin):
 
             for index, row in df.iterrows():
                 try:
-                    # Генерация учетных данных
-                    login = f"teacher_{''.join(random.choices(string.ascii_lowercase + string.digits, k=6))}"
-                    password = generate_password()
+                    user, password = create_user_with_unique_login("teacher")
                     
-                    # Парсинг данных
                     date_input = pd.to_datetime(row.get("date_input", datetime.date.today())).strftime("%Y-%m-%d")
                     date_output = pd.to_datetime(row["date_output"]).strftime("%Y-%m-%d") if row.get("date_output") else None
 
-                    # Создание пользователя
-                    user = User.objects.create(
-                        email=login,
-                        is_active=True,
-                        is_staff=False,
-                    )
-                    user.set_password(password)
-                    user.save()
-
-                    # Создание записи преподавателя
                     discipline_prepod = DisciplinePrepod.objects.create(
                         user=user,
                         first_name=row["first_name"],
@@ -309,7 +288,7 @@ class DisciplinePrepodAdmin(admin.ModelAdmin):
                     )
 
                     created.append({
-                        "username": login,
+                        "username": user.email,
                         "password": password,
                         "first_name": discipline_prepod.first_name,
                         "last_name": discipline_prepod.last_name,
@@ -345,13 +324,8 @@ class DisciplinePrepodAdmin(admin.ModelAdmin):
         messages.error(request, "Файл для скачивания не найден")
         return redirect("..")
 
-   
-
-
-
 # Регистрируем администраторов моделей
 admin.site.register(User, UserAdmin)
-admin.site.register(Guardian, GuardianAdmin)
 admin.site.register(Student, StudentAdmin)
 admin.site.register(DisciplinePrepod, DisciplinePrepodAdmin)
 admin.site.register(TutorPrepod, TutorPrepodAdmin)
