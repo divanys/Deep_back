@@ -29,14 +29,13 @@ def parse_docx_to_student_xlsx(docx_file, output_path):
             fio_parts[0].capitalize(),
             "2005-09-01",
             "ЛОЖЬ",
-            "",
             group_name or "",
             "2022-09-01"
         ])
 
     wb = Workbook()
     ws = wb.active
-    ws.append(["first_name", "middle_name", "last_name", "date_birthday", "is_headman", "guardian", "group", "date_input"])
+    ws.append(["first_name", "middle_name", "last_name", "date_birthday", "is_headman", "group", "date_input"])
     for student in students:
         ws.append(student)
     wb.save(output_path)

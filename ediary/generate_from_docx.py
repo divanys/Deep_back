@@ -35,7 +35,6 @@ def extract_students_from_docx(docx_path):
             last_name,
             "2005-09-01",
             "ЛОЖЬ",
-            "",
             group_name or "",
             "2022-09-01"
         ])
@@ -45,7 +44,7 @@ def save_students_to_xlsx(students, group_name, output_path):
     wb = Workbook()
     ws = wb.active
     ws.title = "Студенты"
-    headers = ["first_name", "middle_name", "last_name", "date_birthday", "is_headman", "guardian", "group", "date_input"]
+    headers = ["first_name", "middle_name", "last_name", "date_birthday", "is_headman", "group", "date_input"]
     ws.append(headers)
     for row in students:
         ws.append(row)
@@ -67,4 +66,4 @@ def process_all_docx_in_folder(folder_path):
         print(f"✅ Обработан: {docx_file.name} → {output_path.name}")
 
 # Пример запуска
-process_all_docx_in_folder("C:/путь/к/папке/с/docx")
+

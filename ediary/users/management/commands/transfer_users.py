@@ -30,8 +30,8 @@ def create_student(conn, cursor, student):
     
     cursor.execute(
         """
-        INSERT INTO users_student (user, first_name, middle_name, last_name, date_birthday, is_learning, is_headman, guardian, group, date_input, date_output, sub_groups)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+        INSERT INTO users_student (user, first_name, middle_name, last_name, date_birthday, is_learning, is_headman, group, date_input, date_output, sub_groups)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
         """,
         (
             user_id,
@@ -41,7 +41,6 @@ def create_student(conn, cursor, student):
             student.get("date_birthday"),
             student.get("is_learning"),
             student.get("is_headman"),
-            student.get("guardian"),
             student.get("group"),
             student.get("date_input"),
             student.get("date_output"),

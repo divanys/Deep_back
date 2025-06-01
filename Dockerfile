@@ -9,6 +9,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Копируем всё остальное
 COPY . .
 
+WORKDIR /app/ediary
+
 # Открываем порт
 EXPOSE 8000
 

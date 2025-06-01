@@ -13,7 +13,6 @@ def parse_xlsx_to_json(xlsx_file, output_json):
             "date_birthday": row["date_birthday"],
             "is_learning": "true",  # Значение по умолчанию
             "is_headman": row["is_headman"],
-            "guardian": "",
             "group": "",
             "date_input": row["date_input"],
             "date_output": "",  # Значение по умолчанию
